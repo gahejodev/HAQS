@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HAQS SEO Tools</title>
+
+<style>
+body{
+font-family:Arial;
+margin:0;
+background:#0f2027;
+color:white;
+}
+
+header{
+background:#111;
+padding:15px;
+text-align:center;
+font-size:22px;
+font-weight:bold;
+}
+
+.container{
+padding:15px;
+}
+
+.card{
+background:#1e2a38;
+padding:15px;
+margin-bottom:15px;
+border-radius:8px;
+}
+
+button{
+padding:10px;
+margin-top:10px;
+width:100%;
+background:#00d4ff;
+border:none;
+border-radius:6px;
+font-weight:bold;
+}
+
+textarea,input{
+width:100%;
+padding:10px;
+margin-top:10px;
+border-radius:6px;
+border:none;
+}
+
+.result{
+margin-top:10px;
+background:#111;
+padding:10px;
+border-radius:6px;
+}
+</style>
+</head>
+
+<body>
+
+<header>HAQS All-in-One SEO Tools</header>
+
+<div class="container">
+
+<div class="card">
+<h3>Word Counter</h3>
+<textarea id="textInput" placeholder="Paste text here"></textarea>
+<button onclick="countWords()">Count</button>
+<div class="result" id="wordResult"></div>
+</div>
+
+<div class="card">
+<h3>Keyword Density Checker</h3>
+<input id="keyword" placeholder="Keyword">
+<textarea id="content" placeholder="Paste content"></textarea>
+<button onclick="density()">Check Density</button>
+<div class="result" id="densityResult"></div>
+</div>
+
+<div class="card">
+<h3>Meta Tag Generator</h3>
+<input id="title" placeholder="Page Title">
+<input id="description" placeholder="Meta Description">
+<button onclick="meta()">Generate</button>
+<div class="result" id="metaResult"></div>
+</div>
+
+<div class="card">
+<h3>SEO Title Generator</h3>
+<input id="topic" placeholder="Keyword or Topic">
+<button onclick="titleGen()">Generate Titles</button>
+<div class="result" id="titleResult"></div>
+</div>
+
+</div>
+
+<script>
+
+function countWords(){
+let text=document.getElementById("textInput").value;
+let words=text.trim().split(/\s+/).length;
+document.getElementById("wordResult").innerText="Words: "+words;
+}
+
+function density(){
+let keyword=document.getElementById("keyword").value.toLowerCase();
+let content=document.getElementById("content").value.toLowerCase();
+
+let words=content.split(/\s+/);
+let count=0;
+
+words.forEach(w=>{
+if(w===keyword) count++;
+});
+
+let density=(count/words.length*100).toFixed(2);
+
+document.getElementById("densityResult").innerText=
+"Keyword Count: "+count+" | Density: "+density+"%";
+}
+
+function meta(){
+let title=document.getElementById("title").value;
+let desc=document.getElementById("description").value;
+
+let code=
+`<title>${title}</title>
+<meta name="description" content="${desc}">`;
+
+document.getElementById("metaResult").innerText=code;
+}
+
+function titleGen(){
+let topic=document.getElementById("topic").value;
+
+let titles=[
+"Best "+topic+" Guide 2026",
+"Top 10 "+topic+" Tips",
+"Complete "+topic+" Tutorial",
+"How to Master "+topic,
+"Beginner's Guide to "+topic
+];
+
+document.getElementById("titleResult").innerText=titles.join("\n");
+}
+
+</script>
+
+</body>
+</html>
