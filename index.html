@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A small collection of browser-based writing and SEO helper tools.">
+  <title>HAQS SEO Tools</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #101820;
+      color: #f4f7fb;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    header {
+      padding: 28px 18px;
+      text-align: center;
+      background: #172633;
+      border-bottom: 1px solid #2c4152;
+    }
+
+    header h1 { margin: 0 0 6px; font-size: clamp(1.6rem, 4vw, 2.2rem); }
+    header p { margin: 0; color: #bdcbd7; }
+
+    main {
+      width: min(100% - 28px, 960px);
+      margin: 24px auto 40px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      min-width: 0;
+      padding: 18px;
+      background: #1b2a37;
+      border: 1px solid #304454;
+      border-radius: 12px;
+    }
+
+    h2 { margin: 0 0 8px; font-size: 1.15rem; }
+    .help { margin: 0 0 12px; color: #bdcbd7; font-size: .92rem; }
+
+    label { display: block; margin-top: 12px; font-size: .9rem; }
+
+    input, textarea {
+      display: block;
+      width: 100%;
+      margin-top: 6px;
+      padding: 11px 12px;
+      border: 1px solid #41596b;
+      border-radius: 7px;
+      background: #101820;
+      color: #fff;
+      font: inherit;
+    }
+
+    textarea { min-height: 105px; resize: vertical; }
+    input:focus, textarea:focus { outline: 2px solid #49c7df; outline-offset: 1px; }
+
+    button {
+      margin-top: 12px;
+      padding: 10px 14px;
+      border: 0;
+      border-radius: 7px;
+      background: #55d3e8;
+      color: #10202a;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:hover { background: #8ce7f4; }
+
+    .result {
+      min-height: 42px;
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 7px;
+      background: #101820;
+      border: 1px solid #304454;
+      overflow-wrap: anywhere;
+      white-space: pre-wrap;
+    }
+
+    .result:empty::before { content: "Your result will appear here."; color: #8195a5; }
+    .small { color: #bdcbd7; font-size: .82rem; }
+    footer { padding: 0 18px 24px; text-align: center; color: #9db0bf; font-size: .85rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>HAQS SEO Tools</h1>
+    <p>Simple text and on-page SEO helpers that run in your browser.</p>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>Word Counter</h2>
+      <p class="help">Count words and characters in a draft.</p>
+      <label for="textInput">Your text</label>
+      <textarea id="textInput" placeholder="Paste or write your text here"></textarea>
+      <button id="countButton" type="button">Count text</button>
+      <div class="result" id="wordResult" aria-live="polite"></div>
+    </section>
+
+    <section class="card">
+      <h2>Keyword Density Checker</h2>
+      <p class="help">Checks an exact phrase against the text you provide. Punctuation is ignored.</p>
+      <label for="keyword">Keyword or phrase</label>
+      <input id="keyword" placeholder="e.g. healthy food">
+      <label for="content">Text to check</label>
+      <textarea id="content" placeholder="Paste the page text here"></textarea>
+      <button id="densityButton" type="button">Check density</button>
+      <div class="result" id="densityResult" aria-live="polite"></div>
+    </section>
+
+    <section class="card">
+      <h2>Meta Tag Generator</h2>
+      <p class="help">Create title and description tags to copy into your page's HTML.</p>
+      <label for="pageTitle">Page title</label>
+      <input id="pageTitle" maxlength="200" placeholder="Your page title">
+      <label for="description">Meta description</label>
+      <textarea id="description" maxlength="500" placeholder="A short description of the page"></textarea>
+      <button id="metaButton" type="button">Generate tags</button>
+      <div class="result" id="metaResult" aria-live="polite"></div>
+      <button id="copyMetaButton" type="button" hidden>Copy tags</button>
+    </section>
+
+    <section class="card">
+      <h2>SEO Title Ideas</h2>
+      <p class="help">Get a few starting points for a title. Edit them to match the actual page.</p>
+      <label for="topic">Topic or keyword</label>
+      <input id="topic" maxlength="120" placeholder="e.g. home gardening">
+      <button id="titleButton" type="button">Generate ideas</button>
+      <div class="result" id="titleResult" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <footer>HAQS is a small utility project. Results are generated in your browser and are not SEO ranking guarantees.</footer>
+
+  <script>
+    'use strict';
+
+    const $ = (id) => document.getElementById(id);
+    let generatedMetaTags = '';
+
+    function getWords(text) {
+      const trimmed = text.trim();
+      return trimmed ? trimmed.split(/\s+/) : [];
+    }
+
+    function normalisePhrase(text) {
+      return text.toLocaleLowerCase().replace(/[^\p{L}\p{N}\s]/gu, ' ').trim().replace(/\s+/g, ' ');
+    }
+
+    function escapeHtmlAttribute(value) {
+      return value
+        .replaceAll('&', '&amp;')
+        .replaceAll('"', '&quot;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;');
+    }
+
+    $('countButton').addEventListener('click', () => {
+      const text = $('textInput').value;
+      const words = getWords(text);
+      const characters = text.length;
+      const charactersWithoutSpaces = text.replace(/\s/g, '').length;
+      $('wordResult').textContent =
+        'Words: ' + words.length +
+        '\nCharacters (with spaces): ' + characters +
+        '\nCharacters (without spaces): ' + charactersWithoutSpaces;
+    });
+
+    $('densityButton').addEventListener('click', () => {
+      const keyword = normalisePhrase($('keyword').value);
+      const words = getWords(normalisePhrase($('content').value));
+
+      if (!keyword) {
+        $('densityResult').textContent = 'Enter a keyword or phrase first.';
+        return;
+      }
+
+      if (!words.length) {
+        $('densityResult').textContent = 'Paste some text to check.';
+        return;
+      }
+
+      const phraseWords = keyword.split(' ');
+      let matches = 0;
+
+      for (let index = 0; index <= words.length - phraseWords.length; index++) {
+        const candidate = words.slice(index, index + phraseWords.length).join(' ');
+        if (candidate === keyword) matches++;
+      }
+
+      const density = (matches * phraseWords.length / words.length) * 100;
+      $('densityResult').textContent =
+        'Phrase matches: ' + matches +
+        '\nWords in text: ' + words.length +
+        '\nKeyword density: ' + density.toFixed(2) + '%';
+    });
+
+    $('metaButton').addEventListener('click', () => {
+      const title = $('pageTitle').value.trim();
+      const description = $('description').value.trim();
+
+      if (!title || !description) {
+        $('metaResult').textContent = 'Add both a page title and a meta description.';
+        $('copyMetaButton').hidden = true;
+        generatedMetaTags = '';
+        return;
+      }
+
+      generatedMetaTags =
+        '<title>' + title.replaceAll('<', '&lt;').replaceAll('>', '&gt;') + '</title>\n' +
+        '<meta name="description" content="' + escapeHtmlAttribute(description) + '">';
+
+      $('metaResult').textContent = generatedMetaTags;
+      $('copyMetaButton').hidden = false;
+    });
+
+    $('copyMetaButton').addEventListener('click', async () => {
+      if (!generatedMetaTags) return;
+
+      try {
+        await navigator.clipboard.writeText(generatedMetaTags);
+        $('copyMetaButton').textContent = 'Copied';
+      } catch {
+        $('metaResult').textContent = generatedMetaTags + '\n\nCopy the tags above manually.';
+      }
+    });
+
+    $('titleButton').addEventListener('click', () => {
+      const topic = $('topic').value.trim();
+
+      if (!topic) {
+        $('titleResult').textContent = 'Enter a topic or keyword first.';
+        return;
+      }
+
+      const year = new Date().getFullYear();
+      const ideas = [
+        'A Beginner’s Guide to ' + topic,
+        'How to Choose ' + topic,
+        topic + ': Tips and Common Questions',
+        'What to Know Before You Try ' + topic,
+        topic + ': A Practical Guide for ' + year
+      ];
+
+      $('titleResult').textContent = ideas.join('\n');
+    });
+  </script>
+</body>
+</html>
