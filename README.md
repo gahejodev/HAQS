@@ -1,24 +1,32 @@
-# HAQS SEO Tools
+# HAQS — Free SEO & Writing Tools
 
-A small collection of browser-based tools for everyday writing and on-page SEO tasks.
+Live site: https://gahejodev.github.io/HAQS/
 
-## Open the tool
+HAQS is a lightweight collection of browser-based tools for writers, creators and website owners. It uses plain HTML, CSS and JavaScript and has no build step or runtime API dependency.
 
-GitHub Pages site: https://gahejodev.github.io/HAQS/
+## Tools
+- Word counter: words, characters, sentences, paragraphs and estimated reading time
+- Keyword density checker: exact phrase frequency calculation
+- Meta tag generator: HTML title and description tags
+- SEO title ideas: editable headline starting points (template-based, not live keyword research)
+- Text case converter: upper, lower, title and sentence case
+- URL slug generator
+- Reading time calculator with adjustable words per minute
 
-## What's included
+## Privacy
+Tool calculations run locally in the visitor's browser. There is no login, account database or server-side text storage. See privacy.html.
 
-- **Word counter:** counts words and characters, with and without spaces.
-- **Keyword density checker:** checks exact words or phrases in pasted text and ignores punctuation.
-- **Meta tag generator:** creates a title tag and meta description you can copy into your page.
-- **SEO title ideas:** suggests a few title drafts from a topic you enter.
+## Run locally
+Open index.html in a modern browser. No package installation or API key is required.
 
-## Run it locally
+## Deployment
+Static site. Confirm GitHub Pages is enabled for the default branch after merging.
 
-Open `index.html` in a modern browser. The tools run on the page; they do not send your text to a server.
+## Monetization status
+Structured for future monetization but not monetized yet: no AdSense code, affiliate tracking, paid features, analytics or fabricated ad placements. Add these only after account approval and appropriate privacy/consent disclosures.
 
-## Current limits
-
-- The title ideas are starting points, not keyword research or ranking predictions.
-- The density checker is a simple text calculation. It does not evaluate search intent, page quality, or Google's ranking systems.
-- There is no account, database, or cloud storage.
+## Limitations
+- SEO title suggestions are template-based, not live keyword research.
+- Keyword density is a simple text statistic, not a ranking score.
+- Reading time is an estimate.
+- HAQS does not promise rankings, traffic or earnings.
