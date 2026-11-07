@@ -1,111 +1,14 @@
 'use strict';
-
-    const $ = (id) => document.getElementById(id);
-    let generatedMetaTags = '';
-
-    function getWords(text) {
-      const trimmed = text.trim();
-      return trimmed ? trimmed.split(/\s+/) : [];
-    }
-
-    function normalisePhrase(text) {
-      return text.toLocaleLowerCase().replace(/[^\p{L}\p{N}\s]/gu, ' ').trim().replace(/\s+/g, ' ');
-    }
-
-    function escapeHtmlAttribute(value) {
-      return value
-        .replaceAll('&', '&amp;')
-        .replaceAll('"', '&quot;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;');
-    }
-
-    $('countButton').addEventListener('click', () => {
-      const text = $('textInput').value;
-      const words = getWords(text);
-      const characters = text.length;
-      const charactersWithoutSpaces = text.replace(/\s/g, '').length;
-      $('wordResult').textContent =
-        'Words: ' + words.length +
-        '\nCharacters (with spaces): ' + characters +
-        '\nCharacters (without spaces): ' + charactersWithoutSpaces;
-    });
-
-    $('densityButton').addEventListener('click', () => {
-      const keyword = normalisePhrase($('keyword').value);
-      const words = getWords(normalisePhrase($('content').value));
-
-      if (!keyword) {
-        $('densityResult').textContent = 'Enter a keyword or phrase first.';
-        return;
-      }
-
-      if (!words.length) {
-        $('densityResult').textContent = 'Paste some text to check.';
-        return;
-      }
-
-      const phraseWords = keyword.split(' ');
-      let matches = 0;
-
-      for (let index = 0; index <= words.length - phraseWords.length; index++) {
-        const candidate = words.slice(index, index + phraseWords.length).join(' ');
-        if (candidate === keyword) matches++;
-      }
-
-      const density = (matches * phraseWords.length / words.length) * 100;
-      $('densityResult').textContent =
-        'Phrase matches: ' + matches +
-        '\nWords in text: ' + words.length +
-        '\nKeyword density: ' + density.toFixed(2) + '%';
-    });
-
-    $('metaButton').addEventListener('click', () => {
-      const title = $('pageTitle').value.trim();
-      const description = $('description').value.trim();
-
-      if (!title || !description) {
-        $('metaResult').textContent = 'Add both a page title and a meta description.';
-        $('copyMetaButton').hidden = true;
-        generatedMetaTags = '';
-        return;
-      }
-
-      generatedMetaTags =
-        '<title>' + title.replaceAll('<', '&lt;').replaceAll('>', '&gt;') + '</title>\n' +
-        '<meta name="description" content="' + escapeHtmlAttribute(description) + '">';
-
-      $('metaResult').textContent = generatedMetaTags;
-      $('copyMetaButton').hidden = false;
-    });
-
-    $('copyMetaButton').addEventListener('click', async () => {
-      if (!generatedMetaTags) return;
-
-      try {
-        await navigator.clipboard.writeText(generatedMetaTags);
-        $('copyMetaButton').textContent = 'Copied';
-      } catch {
-        $('metaResult').textContent = generatedMetaTags + '\n\nCopy the tags above manually.';
-      }
-    });
-
-    $('titleButton').addEventListener('click', () => {
-      const topic = $('topic').value.trim();
-
-      if (!topic) {
-        $('titleResult').textContent = 'Enter a topic or keyword first.';
-        return;
-      }
-
-      const year = new Date().getFullYear();
-      const ideas = [
-        'A Beginner’s Guide to ' + topic,
-        'How to Choose ' + topic,
-        topic + ': Tips and Common Questions',
-        'What to Know Before You Try ' + topic,
-        topic + ': A Practical Guide for ' + year
-      ];
-
-      $('titleResult').textContent = ideas.join('\n');
-    });
+const $=id=>document.getElementById(id), words=t=>(t.trim().match(/[\p{L}\p{N}]+(?:['’][\p{L}\p{N}]+)*/gu)||[]), norm=t=>t.toLocaleLowerCase().replace(/[^\p{L}\p{N}\s]/gu,' ').trim().replace(/\s+/g,' ');
+function put(id,v){if($(id))$(id).textContent=v}
+function copy(v,id){if(!v)return;if(navigator.clipboard&&isSecureContext)navigator.clipboard.writeText(v).then(()=>put(id,'Copied to clipboard.')).catch(()=>put(id,'Select and copy the result manually.'));else put(id,'Select and copy the result manually.')}
+document.addEventListener('DOMContentLoaded',()=>{
+const y=$('year');if(y)y.textContent=new Date().getFullYear();
+const t=$('textInput');if(t){const u=()=>{let n=words(t.value).length;put('wordCount',n);put('charCount',t.value.length);put('charNoSpace',t.value.replace(/\s/g,'').length);put('sentenceCount',(t.value.match(/[.!?]+(?=\s|$)/g)||[]).length);put('paragraphCount',t.value.trim()?t.value.trim().split(/\n\s*\n/).length:0);put('readEstimate',n?Math.max(1,Math.ceil(n/225))+' min':'0 min')};t.addEventListener('input',u);u();$('copyText')?.addEventListener('click',()=>copy(t.value,'wordResult'));$('clearText')?.addEventListener('click',()=>{t.value='';u()})}
+$('densityButton')?.addEventListener('click',()=>{let k=norm($('keyword').value),w=norm($('content').value).split(' ').filter(Boolean);if(!k)return put('densityResult','Enter a keyword or phrase first.');if(!w.length)return put('densityResult','Paste some content to check.');let p=k.split(' '),m=0;for(let i=0;i<=w.length-p.length;i++)if(w.slice(i,i+p.length).join(' ')===k)m++;put('densityResult','Exact phrase matches: '+m+'\nWords in text: '+w.length+'\nKeyword density: '+(m*p.length/w.length*100).toFixed(2)+'%\n\nThis is a simple frequency calculation, not a Google ranking score.')});
+let meta='';$('metaButton')?.addEventListener('click',()=>{let title=$('pageTitle').value.trim(),desc=$('description').value.trim();if(!title||!desc){meta='';return put('metaResult','Please enter both a title and description.')}let esc=s=>s.replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;').replaceAll('>','&gt;');meta='<title>'+esc(title)+'</title>\n<meta name="description" content="'+esc(desc)+'">';put('metaResult',meta);put('titleLength',title.length+' characters');put('descriptionLength',desc.length+' characters')});$('copyMeta')?.addEventListener('click',()=>copy(meta,'metaResult'));
+$('titleButton')?.addEventListener('click',()=>{let x=$('topic').value.trim();if(!x)return put('titleResult','Enter a topic or keyword first.');put('titleResult',['A Beginner’s Guide to '+x,'How to Choose the Right '+x,x+': Tips, Benefits and Common Questions','What to Know Before You Try '+x,'A Practical Guide to '+x].map((v,i)=>(i+1)+'. '+v).join('\n'))});
+$('caseButton')?.addEventListener('click',()=>{let x=$('caseInput').value,m=$('caseMode').value,r=x;if(m==='upper')r=x.toLocaleUpperCase();if(m==='lower')r=x.toLocaleLowerCase();if(m==='title')r=x.toLocaleLowerCase().replace(/\b[\p{L}]/gu,c=>c.toLocaleUpperCase());if(m==='sentence')r=x.toLocaleLowerCase().replace(/(^\s*|[.!?]\s+)[\p{L}]/gu,c=>c.toLocaleUpperCase());put('caseResult',r)});$('copyCase')?.addEventListener('click',()=>copy($('caseResult').textContent,'caseResult'));
+$('slugButton')?.addEventListener('click',()=>{let s=$('slugInput').value.trim().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase().replace(/[^\p{L}\p{N}]+/gu,'-').replace(/^-+|-+$/g,'');put('slugResult',s||'Enter a title to create a slug.')});$('copySlug')?.addEventListener('click',()=>copy($('slugResult').textContent,'slugResult'));
+const rt=$('readingText');if(rt){let u=()=>{let n=words(rt.value).length,w=Math.max(80,Math.min(500,Number($('readingSpeed').value)||225));put('readingWords',n);put('readingMinutes',n?Math.max(1,Math.ceil(n/w))+' min':'0 min')};rt.addEventListener('input',u);$('readingSpeed')?.addEventListener('input',u);u()}
+});
